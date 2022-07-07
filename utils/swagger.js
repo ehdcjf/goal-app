@@ -65,7 +65,7 @@ const options = {
     basePath: "/api/v1",
     securityDefinitions: {
       Bearer: {
-        type: "x-auth-token",
+        type: "apiKey",
         description: "JWT authorization of an API",
         name: "Authorization",
         in: "header",

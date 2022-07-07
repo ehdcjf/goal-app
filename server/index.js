@@ -29,7 +29,6 @@ process.on("SIGINT", () => {
 });
 
 // app.set("db", require("../models/index.js"));
-
 app.set("port", process.env.DEV_APP_PORT);
 app.use("/api/docs", swagger.router);
 
@@ -40,7 +39,7 @@ app.use("/api/docs", swagger.router);
 // 	next();
 // });
 
-// app.use(require("../router"));
+app.use(require("../router"));
 
 app.use((req, res, next) => {
   logger.log(

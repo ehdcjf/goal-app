@@ -3,37 +3,41 @@ const bcrypt = require("bcrypt");
 const _ = require("lodash");
 const jwt = require("jsonwebtoken");
 const MySql = require("../server/database");
-const UserSQL = require("../sql/UserSQL");
+const TagSQL = require("../sql/TagSQL");
 const RequestHandler = require("../utils/RequestHandler");
 const Logger = require("../utils/logger");
 const config = require("../config");
 const auth = require("../utils/auth");
 const logger = new Logger();
 const requestHandler = new RequestHandler(logger);
-const tokenList = {};
 
-class UserController {
-  
-
-  static async fetchUserById(req, res) {
+class TagController {
+  static async fetchTags(req, res) {
     try {
     } catch (err) {
       return requestHandler.sendError(req, res, err);
     }
   }
 
-  static async updateUser(req, res) {
+  static async createTag(req, res) {
     try {
     } catch (err) {
       return requestHandler.sendError(req, res, err);
     }
   }
 
-  static async removeUser(req, res) {
+  static async updateTag(req, res) {
+    try {
+    } catch (err) {
+      return requestHandler.sendError(req, res, err);
+    }
+  }
+
+  static async deleteTag(req, res) {
     try {
     } catch (err) {
       return requestHandler.sendError(req, res, err);
     }
   }
 }
-module.exports = UserController;
+module.exports = TagController;

@@ -6,9 +6,11 @@
 
 const http = require("http");
 const app = require("../server/index");
+const database = require("../server/database");
 const Logger = require("../utils/logger");
 // const { dbConnect } = require("../config/databaseConfig");
 const logger = new Logger();
+const dbinit = database.dbConnect();
 
 // const mongoose = require("mongoose");
 // const { schedule, invoiceBatch } = require("../batch/invoice");
