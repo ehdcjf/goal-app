@@ -3,12 +3,39 @@ const Logger = require("../utils/logger");
 const config = require("../config");
 const logger = new Logger();
 
-class GoalSQL {
-  static async fetchAllGoalsById(data) {
+class TagSQL {
+  static checkExistByName(owner, name) {
     return `
-      SELECT * 
-      FROM pgoal;
+      SELECT *
+      FROM tag
+      WHERE owner='${owner}' AND name='${name}'
+      ;
+    `;
+  }
+
+  static checkExistById(owner, tagId) {
+    return `
+      SELECT *
+      FROM tag
+      WHERE owner='${owner}' AND uuid='${tagId}'
+      ;
+    `;
+  }
+
+  static createNewTag() {
+    return `
+      INSERT INTO tag(owner,name)
+      VALUES(?,?);
+      ;
+    `;
+  }
+
+  static updateTag() {
+    return `
+      UPDATE tag
+      set name=?
+      where uuid=?
     `;
   }
 }
-module.exports = GoalSQL;
+module.exports = TagSQL;

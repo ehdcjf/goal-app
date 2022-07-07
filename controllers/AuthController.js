@@ -77,7 +77,6 @@ class AuthController {
         requestHandler.throwError(400, "bad request", "invalid id")();
       }
 
-      console.log(user[0]);
       await bcrypt.compare(pw, user[0].pw).then(
         requestHandler.throwIf(
           (r) => !r,
@@ -89,9 +88,7 @@ class AuthController {
       );
 
       const payload = _.omit(user[0], [
-        "uuid",
-        "id",
-        "name",
+        "pw",
         "email",
         "dob",
         "phone",

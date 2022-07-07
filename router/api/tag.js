@@ -2,12 +2,12 @@ const router = require("express").Router();
 const TagController = require("../../controllers/TagController");
 const auth = require("../../utils/auth");
 
-router.get("/:id", TagController.fetchTags);
+router.get("/", TagController.fetchTags);
 
-router.post("/new", TagController.createTag);
+router.post("/new", auth.isAuthunticated, TagController.createTag);
 
-router.patch("/:id", TagController.updateTag);
+router.patch("/:tagId", auth.isAuthunticated, TagController.updateTag);
 
-router.delete("/:id", TagController.deleteTag);
+router.delete("/:tagId", TagController.deleteTag);
 
 module.exports = router;
