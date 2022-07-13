@@ -2,10 +2,9 @@ const Joi = require("joi");
 const bcrypt = require("bcrypt");
 const _ = require("lodash");
 const jwt = require("jsonwebtoken");
+const BaseController = require("./BaseController");
 const RequestHandler = require("../utils/RequestHandler");
 const Logger = require("../utils/logger");
-const MySql = require("../server/database");
-const UserSQL = require("../sql/UserSQL");
 const config = require("../config");
 const auth = require("../utils/auth");
 
@@ -13,7 +12,7 @@ const logger = new Logger();
 const requestHandler = new RequestHandler(logger);
 const tokenList = {};
 
-class AuthController {
+class AuthController extends BaseController {
   static async join(req, res) {
     try {
       const reqData = req.body;
@@ -22,17 +21,16 @@ class AuthController {
         pw: Joi.string().required(),
         name: Joi.string().required(),
       });
-      const { value } = schema.validate(reqData);
+      const { value, error } = schema.validate(reqData);
       requestHandler.validateJoi(
-        value,
+        error,
         400,
         "bad Request",
         "invalid Join Data"
       );
       const { id, name, pw } = value;
 
-      const checkSql = UserSQL.checkUserExist(id);
-      const checkExist = await MySql.query(checkSql);
+      const checkExist = await super.getByOptions("User", { id });
       if (checkExist.length > 0) {
         requestHandler.throwError(
           400,
@@ -44,12 +42,13 @@ class AuthController {
       const salt = bcrypt.genSaltSync(Number(config.auth.saltRounds));
       const hashedPass = bcrypt.hashSync(pw, salt);
 
-      const createSql = UserSQL.createNewUser();
-      const createParams = [id, hashedPass, name];
+      const data = {
+        ...value,
+        pw: hashedPass,
+      };
 
-      const result = await MySql.execute(createSql, createParams);
-
-      return requestHandler.sendSuccess(res, `Create User: ${id}`)(result.data);
+      await super.create("User", data);
+      return requestHandler.sendSuccess(res, `Create User`)();
     } catch (err) {
       return requestHandler.sendError(req, res, err);
     }
@@ -62,22 +61,21 @@ class AuthController {
         id: Joi.string().required(),
         pw: Joi.string().required(),
       });
-      const { value } = schema.validate(reqData);
+      const { value, error } = schema.validate(reqData);
       requestHandler.validateJoi(
-        value,
+        error,
         400,
         "bad Request",
         "invalid Join Data"
       );
       const { id, pw } = value;
 
-      const checkSql = UserSQL.checkUserExist(id);
-      const user = await MySql.query(checkSql);
+      const user = await super.getOneByOptions("User", { id });
       if (user.length == 0) {
         requestHandler.throwError(400, "bad request", "invalid id")();
       }
 
-      await bcrypt.compare(pw, user[0].pw).then(
+      await bcrypt.compare(pw, user.pw).then(
         requestHandler.throwIf(
           (r) => !r,
           400,
@@ -87,14 +85,8 @@ class AuthController {
         requestHandler.throwError(500, "bcrypt error")
       );
 
-      const payload = _.omit(user[0], [
-        "pw",
-        "email",
-        "dob",
-        "phone",
-        "address",
-        "image",
-      ]);
+      const payload = _.omit(user, ["pw", "updatedAt", "__v"]);
+
       const token = jwt.sign({ payload }, config.auth.jwt_secret, {
         expiresIn: config.auth.jwt_expiresin,
         algorithm: "HS512",

@@ -6,23 +6,17 @@
 
 const http = require("http");
 const app = require("../server/index");
-const database = require("../server/database");
 const Logger = require("../utils/logger");
-// const { dbConnect } = require("../config/databaseConfig");
 const logger = new Logger();
-const dbinit = database.dbConnect();
-
-// const mongoose = require("mongoose");
-// const { schedule, invoiceBatch } = require("../batch/invoice");
-// mongoose
-// 	.connect(DBCONFIG.MONGO_URI)
-// 	.then(() => {
-// 		console.log("MongoDB Connection");
-// 	})
-// 	.catch((error) => {
-// 		logger.error(error.toString());
-// 		console.log(error);
-// 	});
+const mongoose = require("mongoose");
+mongoose
+  .connect("mongodb://localhost:27017/cheolog")
+  .then(() => {
+    logger.log("MongoDB Connection", "info");
+  })
+  .catch((error) => {
+    logger.log(error.toString(), "error");
+  });
 
 /**
  * Create HTTP server.

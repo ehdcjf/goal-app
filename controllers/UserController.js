@@ -2,8 +2,6 @@ const Joi = require("joi");
 const bcrypt = require("bcrypt");
 const _ = require("lodash");
 const jwt = require("jsonwebtoken");
-const MySql = require("../server/database");
-const UserSQL = require("../sql/UserSQL");
 const RequestHandler = require("../utils/RequestHandler");
 const Logger = require("../utils/logger");
 const config = require("../config");
@@ -13,8 +11,6 @@ const requestHandler = new RequestHandler(logger);
 const tokenList = {};
 
 class UserController {
-  
-
   static async fetchUserById(req, res) {
     try {
     } catch (err) {

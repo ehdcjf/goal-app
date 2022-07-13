@@ -1,11 +1,11 @@
 const router = require("express").Router();
 
-router.use("/user", require("./user"));
+router.use("/", require("./auth"));
 
-router.use("/auth", require("./auth"));
+router.use("/user", require("./user"));
 
 router.use("/tag", require("./tag"));
 
-// router.use("/goal", require("./goal"));
+router.use("/goal", require("./goal"));
 
 module.exports = router;

@@ -35,13 +35,13 @@ function getFullPathes(names) {
 }
 
 getFullPathes(filesName);
-
 const options = {
   swaggerDefinition: {
     info: {
-      title: "cheolog",
-      version: "1.0.0",
-      description: "Cheolog ,REST API with Swagger doc",
+      open_api_version: "3.0.3",
+      title: "cheolog API",
+      version: "2.0.0",
+      description: "Controller for Cheolog API Calls are defined here",
       contact: {
         email: "kdch0823@naver.com",
       },
@@ -60,9 +60,9 @@ const options = {
         description: "for setting Goal ",
       },
     ],
-    schemes: ["http"],
+    schemes: ["http", "https"],
     host: `localhost:${config.app.port}`,
-    basePath: "/api/v1",
+    basePath: "/api/v1/",
     securityDefinitions: {
       Bearer: {
         type: "apiKey",
