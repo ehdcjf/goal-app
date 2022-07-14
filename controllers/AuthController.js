@@ -66,13 +66,13 @@ class AuthController extends BaseController {
         error,
         400,
         "bad Request",
-        "invalid Join Data"
+        "invalid Login Data"
       );
       const { id, pw } = value;
 
       const user = await super.getOneByOptions("User", { id });
-      if (user.length == 0) {
-        requestHandler.throwError(400, "bad request", "invalid id")();
+      if (!user) {
+        requestHandler.throwError(401, "bad request", "invalid id")();
       }
 
       await bcrypt.compare(pw, user.pw).then(
