@@ -59,7 +59,7 @@ class AuthController extends BaseController {
       return requestHandler.sendSuccess(
         res,
         `Create User`
-      )({ user: { id: user.id, name: user.name }, token });
+      )({ user: { id: id, name: name }, token });
     } catch (err) {
       return requestHandler.sendError(req, res, err);
     }
