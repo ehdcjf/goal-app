@@ -48,7 +48,18 @@ class AuthController extends BaseController {
       };
 
       await super.create("User", data);
-      return requestHandler.sendSuccess(res, `Create User`)();
+
+      const payload = { id, name };
+
+      const token = jwt.sign({ payload }, config.auth.jwt_secret, {
+        expiresIn: config.auth.jwt_expiresin,
+        algorithm: "HS512",
+      });
+
+      return requestHandler.sendSuccess(
+        res,
+        `Create User`
+      )({ user: { id: user.id, name: user.name }, token });
     } catch (err) {
       return requestHandler.sendError(req, res, err);
     }
@@ -85,7 +96,13 @@ class AuthController extends BaseController {
         requestHandler.throwError(500, "bcrypt error")
       );
 
-      const payload = _.omit(user, ["pw", "updatedAt", "__v"]);
+      const payload = _.omit(user, [
+        "_id",
+        "pw",
+        "updatedAt",
+        "createdAt",
+        "__v",
+      ]);
 
       const token = jwt.sign({ payload }, config.auth.jwt_secret, {
         expiresIn: config.auth.jwt_expiresin,
