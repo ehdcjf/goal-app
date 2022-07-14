@@ -110,6 +110,7 @@ class AuthController extends BaseController {
         res,
         "User logged in Successfully"
       )({
+        user: { id: user.id, name: user.name },
         token,
         // refreshToken
       });

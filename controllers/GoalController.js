@@ -253,7 +253,7 @@ class GoalController extends BaseController {
         name: Joi.string(),
         detail: Joi.string(),
         tag: Joi.array().items(Joi.string()),
-        status: Joi.string().valid("ASSIGNED", "PROCESSING", "DONE"),
+        status: Joi.string().valid("ASSIGNEluD", "PROCESSING", "DONE"),
         achievement: achievement,
       });
 
