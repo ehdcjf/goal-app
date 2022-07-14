@@ -34,6 +34,14 @@ function getFullPathes(names) {
   });
 }
 
+let host = "";
+if (process.env.NODE_ENV === "production") {
+  host = "3.37.130.205";
+} else if (process.env.NODE_ENV === "develpment") {
+  host = "3.37.130.205";
+} else if (process.env.NODE_ENV === "local") {
+  host = "localhost:3000";
+}
 getFullPathes(filesName);
 const options = {
   swaggerDefinition: {
@@ -61,7 +69,7 @@ const options = {
       },
     ],
     schemes: ["http", "https"],
-    host: `localhost:${config.app.port}`,
+    host: host,
     basePath: "/api/v1/",
     securityDefinitions: {
       Bearer: {
@@ -74,6 +82,7 @@ const options = {
   },
   apis: pathes,
 };
+
 const swaggerSpec = swaggerJSDoc(options);
 require("swagger-model-validator")(swaggerSpec);
 
