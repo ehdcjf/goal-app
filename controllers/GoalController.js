@@ -242,6 +242,7 @@ class GoalController extends BaseController {
         owner: req.decoded.payload.id,
         goalId: req.params.goalId,
       };
+      console.log(reqData);
       const achievement = Joi.object().keys({
         name: Joi.string().required(),
         link: Joi.string().required(),
@@ -258,6 +259,8 @@ class GoalController extends BaseController {
       });
 
       const { value, error } = schema.validate(reqData);
+      console.log(value);
+      console.log(error);
       requestHandler.validateJoi(error, 400, "bad Request", "invalid User Id");
 
       const { owner, name, goalId, tag } = value;
