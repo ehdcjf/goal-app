@@ -30,12 +30,7 @@ const GoalSchema = mongoose.Schema(
       enum: ["ASSIGNED", "PROCESSING", "DONE"],
       default: "ASSIGNED",
     },
-    tag: [
-      {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Tag",
-      },
-    ],
+    tag: [String],
     startedAt: {
       type: Date,
     },

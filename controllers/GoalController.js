@@ -42,15 +42,13 @@ class GoalController extends BaseController {
       const Tags = [];
 
       if (tag) {
-        const tags = [...new Set(tag)];
         const updateData = [];
         const createData = [];
-        for (let i = 0; i < tags.length; i++) {
-          const tname = tags[i];
+        for (let i = 0; i < tag.length; i++) {
+          const tname = tag[i];
           const index = originTags.map((v) => v.name).indexOf(tname);
           if (index > -1) {
             updateData.push({ _id: ObjectId(originTags[index]._id) });
-            Tags.push(originTags[index]._id);
           } else {
             createData.push({ owner, name: tname });
           }
@@ -65,19 +63,13 @@ class GoalController extends BaseController {
         }
         if (createData.length > 0) {
           const newTags = await super.createMany("Tag", createData);
-          newTags.forEach((t) => {
-            Tags.push(t._id);
-          });
         }
       }
-      value.tag = Tags;
       const result = await super.create("Goal", value);
       const retData = { ...result.toObject() };
       retData.goalId = retData._id;
       delete retData._id;
       delete retData.__v;
-      delete retData.updatedAt;
-      retData.tag = [...new Set(tag)];
 
       return requestHandler.sendSuccess(res, `Create Goal`)(retData);
     } catch (err) {
