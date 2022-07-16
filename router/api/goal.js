@@ -77,8 +77,7 @@ router.post("/new", auth.isAuthunticated, GoalController.createGoal);
  *        enum:
  *          - name
  *          - create
- *          - start
- *          - end
+ *          - update
  *
  *      - name: order
  *        description: "new:1, old:-1"
@@ -111,6 +110,7 @@ router.post("/new", auth.isAuthunticated, GoalController.createGoal);
  *         description: Create Goal
  */
 router.get("/:userId", GoalController.fetchGoals);
+router.get("/:userId/init", GoalController.initGoals);
 
 /**
  * @swagger
