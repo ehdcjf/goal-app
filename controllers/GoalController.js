@@ -135,7 +135,7 @@ class GoalController extends BaseController {
             endedAt: { $first: "$endedAt" },
             createdAt: { $first: "$createdAt" },
             achievement: { $first: "$achievement" },
-            tags: { $push: "$tagObjects.name" },
+            tag: { $push: "$tagObjects.name" },
           },
         },
         { $match: { $and: [{ owner: owner }] } },
@@ -157,7 +157,7 @@ class GoalController extends BaseController {
                   endedAt: 1,
                   createdAt: 1,
                   achievement: 1,
-                  tags: 1,
+                  tag: 1,
                 },
               },
             ],
@@ -192,15 +192,9 @@ class GoalController extends BaseController {
           case "name":
             aggregateConfig[4].$facet.list.unshift({ $sort: { name: order } });
             break;
-
-          case "start":
+          case "update":
             aggregateConfig[4].$facet.list.unshift({
-              $sort: { startedAt: order, _id: 1 },
-            });
-            break;
-          case "end":
-            aggregateConfig[4].$facet.list.unshift({
-              $sort: { endedAt: order, _id: 1 },
+              $sort: { updatedAt: order },
             });
             break;
           case "create":
@@ -258,9 +252,6 @@ class GoalController extends BaseController {
       });
 
       const { value, error } = schema.validate(reqData);
-      console.log(reqData);
-      console.log(value);
-      console.log(error);
 
       requestHandler.validateJoi(
         error,
