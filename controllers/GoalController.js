@@ -245,7 +245,6 @@ class GoalController extends BaseController {
       const achievement = Joi.object().keys({
         name: Joi.string().required(),
         link: Joi.string().required(),
-        _id: Joi.string(),
       });
 
       const schema = Joi.object({
@@ -254,7 +253,7 @@ class GoalController extends BaseController {
         name: Joi.string(),
         detail: Joi.string(),
         tag: Joi.array().items(Joi.string()),
-        status: Joi.string().valid("ASSIGNEluD", "PROCESSING", "DONE"),
+        status: Joi.string().valid("ASSIGNED", "PROCESSING", "DONE"),
         achievement: Joi.array().items(achievement),
       });
 
