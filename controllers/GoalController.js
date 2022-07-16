@@ -61,10 +61,10 @@ class GoalController extends BaseController {
         owner: Joi.string().required(),
         page: Joi.number().integer().required(),
         rows: Joi.number().integer().required(),
-        sortby: Joi.string(),
+        sort: Joi.string(),
         order: Joi.number(),
         tag: Joi.array().items(Joi.string()),
-        searchWord: Joi.string(),
+        name: Joi.string(),
         status: Joi.string().valid("ASSIGNED", "PROCESSING", "DONE"),
       });
 
@@ -75,8 +75,7 @@ class GoalController extends BaseController {
         "bad Request",
         "invalid Request Data"
       );
-      const { owner, page, rows, sortby, order, searchWord, tag, status } =
-        value;
+      const { owner, page, rows, sort, order, name, tag, status } = value;
 
       const tagAggregateConfig = [
         { $match: { owner: owner } },
@@ -96,6 +95,7 @@ class GoalController extends BaseController {
         {
           $project: {
             owner: "$_id",
+            _id: 0,
             tag: 1,
           },
         },
@@ -131,9 +131,9 @@ class GoalController extends BaseController {
         },
       ];
 
-      if (searchWord) {
+      if (name) {
         aggregateConfig[0].$match.$and.push({
-          name: { $regex: ".*" + searchWord + ".*", $options: "i" },
+          name: { $regex: ".*" + name + ".*", $options: "i" },
         });
       }
 
@@ -153,8 +153,8 @@ class GoalController extends BaseController {
         });
       }
 
-      if (sortby && order) {
-        switch (sortby) {
+      if (sort && order) {
+        switch (sort) {
           case "name":
             aggregateConfig[1].$facet.list.unshift({ $sort: { name: order } });
             break;
@@ -204,10 +204,10 @@ class GoalController extends BaseController {
         owner: Joi.string().required(),
         page: Joi.number().integer().required(),
         rows: Joi.number().integer().required(),
-        sortby: Joi.string(),
+        sort: Joi.string(),
         order: Joi.number(),
         tag: Joi.array().items(Joi.string()),
-        searchWord: Joi.string(),
+        name: Joi.string(),
         status: Joi.string().valid("ASSIGNED", "PROCESSING", "DONE"),
       });
 
@@ -218,8 +218,7 @@ class GoalController extends BaseController {
         "bad Request",
         "invalid Request Data"
       );
-      const { owner, page, rows, sortby, order, searchWord, tag, status } =
-        value;
+      const { owner, page, rows, sort, order, name, tag, status } = value;
 
       const limit = rows;
       const skip = page * rows;
@@ -240,8 +239,7 @@ class GoalController extends BaseController {
                   detail: 1,
                   owner: 1,
                   status: 1,
-                  startedAt: 1,
-                  endedAt: 1,
+                  updatedAt: 1,
                   createdAt: 1,
                   achievement: 1,
                   tag: 1,
@@ -252,9 +250,9 @@ class GoalController extends BaseController {
         },
       ];
 
-      if (searchWord) {
+      if (name) {
         aggregateConfig[0].$match.$and.push({
-          name: { $regex: ".*" + searchWord + ".*", $options: "i" },
+          name: { $regex: ".*" + name + ".*", $options: "i" },
         });
       }
 
@@ -274,8 +272,8 @@ class GoalController extends BaseController {
         });
       }
 
-      if (sortby && order) {
-        switch (sortby) {
+      if (sort && order) {
+        switch (sort) {
           case "name":
             aggregateConfig[1].$facet.list.unshift({ $sort: { name: order } });
             break;

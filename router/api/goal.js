@@ -43,6 +43,38 @@ router.post("/new", auth.isAuthunticated, GoalController.createGoal);
 
 /**
  * @swagger
+ * /goal/{userId}/init:
+ *   get:
+ *     summary: Fetch Goal List & Tag List
+ *     tags:
+ *       - Goal
+ *     produces:
+ *       - application/json
+ *     parameters:
+ *      - name: userId
+ *        description: userid
+ *        in: path
+ *        required: true
+ *        type: string
+ *
+ *      - name: page
+ *        description: Page Number
+ *        in: query
+ *        required: true
+ *        type: integer
+ *
+ *      - name: rows
+ *        description: Number of rows
+ *        in: query
+ *        required: true
+ *        type: integer
+ *     responses:
+ *       200:
+ *         description: Fetch Goals
+ */
+router.get("/:userId/init", GoalController.initGoals);
+/**
+ * @swagger
  * /goal/{userId}:
  *   get:
  *     summary: Fetch Goal List
@@ -69,7 +101,7 @@ router.post("/new", auth.isAuthunticated, GoalController.createGoal);
  *        required: true
  *        type: integer
  *
- *      - name: sortby
+ *      - name: sort
  *        description: Indicates which record column to sort by.
  *        in: query
  *        required: false
@@ -80,13 +112,13 @@ router.post("/new", auth.isAuthunticated, GoalController.createGoal);
  *          - update
  *
  *      - name: order
- *        description: "new:1, old:-1"
+ *        description: "new:-1, old:1"
  *        in: query
  *        required: false
  *        type: integer
  *        enum:
- *          - 1
  *          - -1
+ *          - 1
  *
  *      - name: status
  *        description: goal`s status
@@ -107,9 +139,8 @@ router.post("/new", auth.isAuthunticated, GoalController.createGoal);
  *          type: string
  *     responses:
  *       200:
- *         description: Create Goal
+ *         description: Fetch Goals
  */
-router.get("/:userId/init", GoalController.initGoals);
 router.get("/:userId", GoalController.fetchGoals);
 
 /**
@@ -187,11 +218,3 @@ router.patch("/:goalId", auth.isAuthunticated, GoalController.updateGoal);
 router.delete("/:goalId", auth.isAuthunticated, GoalController.deleteGoal);
 
 module.exports = router;
-
-/**
-
-
- *         style: form
- *         explode: false
- *
- */
