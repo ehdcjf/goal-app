@@ -109,8 +109,8 @@ router.post("/new", auth.isAuthunticated, GoalController.createGoal);
  *       200:
  *         description: Create Goal
  */
-router.get("/:userId", GoalController.fetchGoals);
 router.get("/:userId/init", GoalController.initGoals);
+router.get("/:userId", GoalController.fetchGoals);
 
 /**
  * @swagger
