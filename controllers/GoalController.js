@@ -113,7 +113,7 @@ class GoalController extends BaseController {
         value;
 
       const limit = rows;
-      const skip = (page - 1) * rows;
+      const skip = page * rows;
       const aggregateConfig = [
         {
           $lookup: {
@@ -211,6 +211,7 @@ class GoalController extends BaseController {
 
       console.log(JSON.stringify(aggregateConfig));
       const result = await super.aggregate("Goal", aggregateConfig);
+      console.log(result.totalSize);
       const retData = {};
       if (result[0].totalSize.length == 0) {
         retData.totalSize = 0;
@@ -218,6 +219,7 @@ class GoalController extends BaseController {
         retData.totalSize = result[0].totalSize[0].totalSize;
       }
       retData.list = result[0].list;
+      console.log(retData);
 
       return requestHandler.sendSuccess(
         res,
