@@ -259,6 +259,10 @@ class GoalController extends BaseController {
       });
 
       const { value, error } = schema.validate(reqData);
+      console.log(reqData);
+      console.log(value);
+      console.log(error);
+
       requestHandler.validateJoi(
         error,
         400,
