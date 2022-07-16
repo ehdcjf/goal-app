@@ -21,6 +21,7 @@ class GoalController extends BaseController {
       });
 
       const { value, error } = schema.validate(reqData);
+      logger.log(JSON.stringify(error), "error");
       requestHandler.validateJoi(
         error,
         400,
@@ -38,33 +39,6 @@ class GoalController extends BaseController {
         )();
       }
 
-      const originTags = await super.getByOptions("Tag", { owner });
-      const Tags = [];
-
-      if (tag) {
-        const updateData = [];
-        const createData = [];
-        for (let i = 0; i < tag.length; i++) {
-          const tname = tag[i];
-          const index = originTags.map((v) => v.name).indexOf(tname);
-          if (index > -1) {
-            updateData.push({ _id: ObjectId(originTags[index]._id) });
-          } else {
-            createData.push({ owner, name: tname });
-          }
-        }
-
-        if (updateData.length > 0) {
-          await super.updateMany(
-            "Tag",
-            { $or: [...updateData] },
-            { $inc: { count: +1 } }
-          );
-        }
-        if (createData.length > 0) {
-          const newTags = await super.createMany("Tag", createData);
-        }
-      }
       const result = await super.create("Goal", value);
       const retData = { ...result.toObject() };
       retData.goalId = retData._id;
@@ -74,6 +48,149 @@ class GoalController extends BaseController {
       return requestHandler.sendSuccess(res, `Create Goal`)(retData);
     } catch (err) {
       requestHandler.sendError(req, res, err);
+    }
+  }
+
+  static async initGoals(req, res) {
+    try {
+      const reqData = { ...req.query, owner: req.params.userId };
+      if (reqData.tag && typeof reqData.tag == "string") {
+        reqData.tag = reqData.tag.split(",");
+      }
+      const schema = Joi.object({
+        owner: Joi.string().required(),
+        page: Joi.number().integer().required(),
+        rows: Joi.number().integer().required(),
+        sortby: Joi.string(),
+        order: Joi.number(),
+        tag: Joi.array().items(Joi.string()),
+        searchWord: Joi.string(),
+        status: Joi.string().valid("ASSIGNED", "PROCESSING", "DONE"),
+      });
+
+      const { value, error } = schema.validate(reqData);
+      requestHandler.validateJoi(
+        error,
+        400,
+        "bad Request",
+        "invalid Request Data"
+      );
+      const { owner, page, rows, sortby, order, searchWord, tag, status } =
+        value;
+
+      const tagAggregateConfig = [
+        { $match: { owner: owner } },
+        { $unwind: "$tag" },
+        {
+          $project: {
+            owner: 1,
+            tag: 1,
+          },
+        },
+        {
+          $group: {
+            _id: "$owner",
+            tag: { $addToSet: "$tag" },
+          },
+        },
+        {
+          $project: {
+            owner: "$_id",
+            tag: 1,
+          },
+        },
+      ];
+      const tagSet = await super.aggregate("Goal", tagAggregateConfig);
+
+      const limit = rows;
+      const skip = page * rows;
+      const aggregateConfig = [
+        { $match: { $and: [{ owner: owner }] } },
+        {
+          $facet: {
+            totalSize: [{ $count: "totalSize" }],
+            list: [
+              { $limit: skip + limit },
+              { $skip: skip },
+              {
+                $project: {
+                  _id: 0,
+                  goalId: "$_id",
+                  name: 1,
+                  detail: 1,
+                  owner: 1,
+                  status: 1,
+                  updatedAt: 1,
+                  createdAt: 1,
+                  achievement: 1,
+                  tag: 1,
+                },
+              },
+            ],
+          },
+        },
+      ];
+
+      if (searchWord) {
+        aggregateConfig[0].$match.$and.push({
+          name: { $regex: ".*" + searchWord + ".*", $options: "i" },
+        });
+      }
+
+      if (status) {
+        aggregateConfig[0].$match.$and.push({
+          status: status,
+        });
+      }
+
+      if (tag && tag.length > 0) {
+        const or = [];
+        tag.forEach((t) => {
+          or.push({ $in: [t, "$tag"] });
+        });
+        aggregateConfig[0].$match.$and.push({
+          $expr: { $or: or },
+        });
+      }
+
+      if (sortby && order) {
+        switch (sortby) {
+          case "name":
+            aggregateConfig[1].$facet.list.unshift({ $sort: { name: order } });
+            break;
+          case "update":
+            aggregateConfig[1].$facet.list.unshift({
+              $sort: { updatedAt: order },
+            });
+            break;
+          case "create":
+            aggregateConfig[1].$facet.list.unshift({
+              $sort: { createdAt: order },
+            });
+            break;
+          default:
+            aggregateConfig[1].$facet.list.unshift({
+              $sort: { createdAt: 1 },
+            });
+        }
+      }
+
+      const result = await super.aggregate("Goal", aggregateConfig);
+      const retData = {};
+      if (result[0].totalSize.length == 0) {
+        retData.totalSize = 0;
+      } else {
+        retData.totalSize = result[0].totalSize[0].totalSize;
+      }
+      retData.list = result[0].list;
+      retData.tag = tagSet[0];
+
+      return requestHandler.sendSuccess(
+        res,
+        `${value.owner}\`s Goals Extracted`
+      )(retData);
+    } catch (error) {
+      return requestHandler.sendError(req, res, error);
     }
   }
 
@@ -107,33 +224,11 @@ class GoalController extends BaseController {
       const limit = rows;
       const skip = page * rows;
       const aggregateConfig = [
-        {
-          $lookup: {
-            from: "tags",
-            let: { tagId: "$tag" },
-            pipeline: [{ $match: { $expr: { $in: ["$_id", "$$tagId"] } } }],
-            as: "tagObjects",
-          },
-        },
-        { $unwind: "$tagObjects" },
-        {
-          $group: {
-            _id: "$_id",
-            name: { $first: "$name" },
-            detail: { $first: "$detail" },
-            owner: { $first: "$owner" },
-            status: { $first: "$status" },
-            startedAt: { $first: "$startedAt" },
-            endedAt: { $first: "$endedAt" },
-            createdAt: { $first: "$createdAt" },
-            achievement: { $first: "$achievement" },
-            tag: { $push: "$tagObjects.name" },
-          },
-        },
         { $match: { $and: [{ owner: owner }] } },
         {
           $facet: {
             totalSize: [{ $count: "totalSize" }],
+
             list: [
               { $limit: skip + limit },
               { $skip: skip },
@@ -158,24 +253,23 @@ class GoalController extends BaseController {
       ];
 
       if (searchWord) {
-        aggregateConfig[3].$match.$and.push({
+        aggregateConfig[0].$match.$and.push({
           name: { $regex: ".*" + searchWord + ".*", $options: "i" },
         });
       }
 
       if (status) {
-        aggregateConfig[3].$match.$and.push({
+        aggregateConfig[0].$match.$and.push({
           status: status,
         });
       }
 
-      console.log(tag);
       if (tag && tag.length > 0) {
         const or = [];
         tag.forEach((t) => {
-          or.push({ $in: [t, "$tags"] });
+          or.push({ $in: [t, "$tag"] });
         });
-        aggregateConfig[3].$match.$and.push({
+        aggregateConfig[0].$match.$and.push({
           $expr: { $or: or },
         });
       }
@@ -183,28 +277,26 @@ class GoalController extends BaseController {
       if (sortby && order) {
         switch (sortby) {
           case "name":
-            aggregateConfig[4].$facet.list.unshift({ $sort: { name: order } });
+            aggregateConfig[1].$facet.list.unshift({ $sort: { name: order } });
             break;
           case "update":
-            aggregateConfig[4].$facet.list.unshift({
+            aggregateConfig[1].$facet.list.unshift({
               $sort: { updatedAt: order },
             });
             break;
           case "create":
-            aggregateConfig[4].$facet.list.unshift({
+            aggregateConfig[1].$facet.list.unshift({
               $sort: { createdAt: order },
             });
             break;
           default:
-            aggregateConfig[4].$facet.list.unshift({
+            aggregateConfig[1].$facet.list.unshift({
               $sort: { createdAt: 1 },
             });
         }
       }
 
-      console.log(JSON.stringify(aggregateConfig));
       const result = await super.aggregate("Goal", aggregateConfig);
-      console.log(result[0].totalSize);
       const retData = {};
       if (result[0].totalSize.length == 0) {
         retData.totalSize = 0;
@@ -212,7 +304,7 @@ class GoalController extends BaseController {
         retData.totalSize = result[0].totalSize[0].totalSize;
       }
       retData.list = result[0].list;
-      console.log(retData);
+      retData.tag = result[0].tag;
 
       return requestHandler.sendSuccess(
         res,
@@ -256,63 +348,7 @@ class GoalController extends BaseController {
 
       const { owner, name, goalId, tag } = value;
       delete value.goalId;
-
-      const originGoal = await super.getById("Goal", goalId);
-      if (!originGoal) {
-        requestHandler.throwError(
-          400,
-          "bad request",
-          "invalid , this goal doesn't exist."
-        )();
-      }
-
-      if (originGoal.owner != owner) {
-        requestHandler.throwError(
-          400,
-          "bad request",
-          "invalid , You are not the owner of this goal."
-        )();
-      }
-      const tempDeleteTags = originGoal.tag.map((v) => {
-        return { _id: ObjectId(v) };
-      });
-
-      await super.updateMany(
-        "Tag",
-        { $or: [...tempDeleteTags] },
-        { $inc: { count: -1 } }
-      );
-
-      const originTags = await super.getByOptions("Tag", { owner });
-      const Tags = [];
-
-      if (tag) {
-        const tags = [...new Set(tag)];
-        const updateData = [];
-        const createData = [];
-        for (let i = 0; i < tags.length; i++) {
-          const tname = tags[i];
-          const index = originTags.map((v) => v.name).indexOf(tname);
-          if (index > -1) {
-            updateData.push({ _id: ObjectId(originTags[index]._id) });
-            Tags.push(originTags[index]._id);
-          } else {
-            createData.push({ owner, name: tname });
-          }
-        }
-
-        await super.updateMany(
-          "Tag",
-          { $or: [...updateData] },
-          { $inc: { count: +1 } }
-        );
-        const newTags = await super.createMany("Tag", createData);
-        newTags.forEach((t) => {
-          Tags.push(t._id);
-        });
-      }
-
-      value.tag = Tags;
+      delete value.owner;
 
       const result = await super.updateOne(
         "Goal",
@@ -340,34 +376,7 @@ class GoalController extends BaseController {
       const { value, error } = schema.validate(reqData);
       requestHandler.validateJoi(error, 400, "bad Request", "invalid User Id");
 
-      const { goalId, owner } = value;
-
-      const originGoal = await super.getById("Goal", goalId);
-      if (!originGoal) {
-        requestHandler.throwError(
-          400,
-          "bad request",
-          "invalid , this goal doesn't exist."
-        )();
-      }
-
-      if (originGoal.owner != owner) {
-        requestHandler.throwError(
-          400,
-          "bad request",
-          "invalid , You are not the owner of this goal."
-        )();
-      }
-
-      const deleteTags = originGoal.tag.map((v) => {
-        return { _id: ObjectId(v) };
-      });
-
-      await super.updateMany(
-        "Tag",
-        { $or: [...deleteTags] },
-        { $inc: { count: -1 } }
-      );
+      const { goalId } = value;
 
       const result = await super.deleteById("Goal", goalId);
       return requestHandler.sendSuccess(res, `Delete Goal`)(result);

@@ -10,7 +10,7 @@ const Logger = require("../utils/logger");
 const logger = new Logger();
 const mongoose = require("mongoose");
 mongoose
-  .connect("mongodb://localhost:27017/cheolog")
+  .connect("mongodb://3.37.130.205:27017/cheolog")
   .then(() => {
     logger.log("MongoDB Connection", "info");
   })
