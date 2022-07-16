@@ -177,6 +177,7 @@ class GoalController extends BaseController {
         });
       }
 
+      console.log(tag);
       if (tag && tag.length > 0) {
         const or = [];
         tag.forEach((t) => {
@@ -211,7 +212,7 @@ class GoalController extends BaseController {
 
       console.log(JSON.stringify(aggregateConfig));
       const result = await super.aggregate("Goal", aggregateConfig);
-      console.log(result.totalSize);
+      console.log(result[0].totalSize);
       const retData = {};
       if (result[0].totalSize.length == 0) {
         retData.totalSize = 0;
