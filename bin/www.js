@@ -54,6 +54,7 @@ app.set("port", port);
 
 function onError(error) {
   if (error.syscall !== "listen") {
+    logger.log(error, "error");
     throw error;
   }
 

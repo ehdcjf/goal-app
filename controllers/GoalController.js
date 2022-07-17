@@ -170,7 +170,7 @@ class GoalController extends BaseController {
             break;
           default:
             aggregateConfig[1].$facet.list.unshift({
-              $sort: { createdAt: 1 },
+              $sort: { updatedAt: -1 },
             });
         }
       }
