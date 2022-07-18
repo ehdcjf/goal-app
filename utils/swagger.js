@@ -36,9 +36,9 @@ function getFullPathes(names) {
 
 let host = "";
 if (process.env.NODE_ENV === "production") {
-  host = "3.37.130.205";
+  host = "3.35.121.149/";
 } else if (process.env.NODE_ENV === "develpment") {
-  host = "3.37.130.205";
+  host = "3.35.121.149/";
 } else if (process.env.NODE_ENV === "local") {
   host = "localhost:3000";
 }
