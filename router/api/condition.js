@@ -37,54 +37,61 @@ router.post("/new", auth.isAuthunticated, ConditionController.createCondition);
  * @swagger
  * /condition/{userId}:
  *   get:
- *     summary: "Fetch Condition List"
+ *     summary: Fetch Condition List
  *     tags:
  *       - Condition
  *     produces:
  *       - application/json
  *     parameters:
- *     - name: userId
- *       description: userid
- *       in: path
- *       required: true
- *       type: string
- *     - name: page
- *       description: Page Number
- *       in: query
- *       required: true
- *       type: integer
- *     - name: rows
- *       description: Number of rows
- *       in: query
- *       required: true
- *       type: integer
- *     - name: sort
- *       description: Indicates which record column to sort by.
- *       in: query
- *       required: false
- *       type: string
- *       enum:
- *         - name
- *         - create
- *         - update
- *     - name: order
- *       description: "new:-1, old:1"
- *       in: query
- *       required: false
- *       type: integer
- *       enum:
- *         - -1
- *         - 1
- *     - name: status
- *       description: condition`s status
- *       in: query
- *       required: false
- *       type: string
- *       enum:
- *         - "NOT YET"
- *         - PROCESSING
+ *      - name: userId
+ *        description: userid
+ *        in: path
+ *        required: true
+ *        type: string
+ *
+ *      - name: page
+ *        description: Page Number
+ *        in: query
+ *        required: true
+ *        type: integer
+ *
+ *      - name: rows
+ *        description: Number of rows
+ *        in: query
+ *        required: true
+ *        type: integer
+ *
+ *      - name: sort
+ *        description: Indicates which record column to sort by.
+ *        in: query
+ *        required: false
+ *        type: string
+ *        enum:
+ *          - name
+ *          - create
+ *          - update
+ *
+ *      - name: order
+ *        description: "new:-1, old:1"
+ *        in: query
+ *        required: false
+ *        type: integer
+ *        enum:
+ *          - -1
+ *          - 1
+ *
+ *      - name: status
+ *        description: condition`s status
+ *        in: query
+ *        required: false
+ *        type: string
+ *        enum:
+ *          - "NOT YET"
+ *          - PROCESSING
+ *
+ *     responses:
  *       200:
- *         description: Fetch Conditions
+ *         description: Fetch Condition
  */
 router.get("/:userId", ConditionController.fetchConditions);
 

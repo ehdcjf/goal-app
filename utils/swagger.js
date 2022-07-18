@@ -67,6 +67,10 @@ const options = {
         name: "Goal",
         description: "for setting Goal ",
       },
+      {
+        name: "Condition",
+        description: "for setting Condition",
+      },
     ],
     schemes: ["http", "https"],
     host: host,

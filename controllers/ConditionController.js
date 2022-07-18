@@ -114,26 +114,24 @@ class ConditionController extends BaseController {
         });
       }
 
-      if (sort && order) {
-        switch (sort) {
-          case "name":
-            aggregateConfig[1].$facet.list.unshift({ $sort: { name: order } });
-            break;
-          case "update":
-            aggregateConfig[1].$facet.list.unshift({
-              $sort: { updatedAt: order },
-            });
-            break;
-          case "create":
-            aggregateConfig[1].$facet.list.unshift({
-              $sort: { createdAt: order },
-            });
-            break;
-          default:
-            aggregateConfig[1].$facet.list.unshift({
-              $sort: { updatedAt: -1 },
-            });
-        }
+      switch (sort) {
+        case "name":
+          aggregateConfig[1].$facet.list.unshift({ $sort: { name: order } });
+          break;
+        case "update":
+          aggregateConfig[1].$facet.list.unshift({
+            $sort: { updatedAt: order },
+          });
+          break;
+        case "create":
+          aggregateConfig[1].$facet.list.unshift({
+            $sort: { createdAt: order },
+          });
+          break;
+        default:
+          aggregateConfig[1].$facet.list.unshift({
+            $sort: { updatedAt: -1 },
+          });
       }
 
       const result = await super.aggregate("Condition", aggregateConfig);
