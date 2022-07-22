@@ -9,12 +9,23 @@ const app = require("../server/index");
 const Logger = require("../utils/logger");
 const logger = new Logger();
 const mongoose = require("mongoose");
+require("dotenv").config();
 mongoose
-  .connect("mongodb://localhost:27017/cheolog")
+
+  .connect(
+    `mongodb://${process.env.DB_USER}:${process.env.DB_PASS}@mongodb:27017/admin?authSource=admin&authMechanism=SCRAM-SHA-1`,
+    {
+      useNewUrlParser: true,
+      dbName: "cheolog",
+    }
+  )
   .then(() => {
     logger.log("MongoDB Connection", "info");
   })
   .catch((error) => {
+    console.log(
+      `mongodb://${process.env.DB_USER}:${process.env.DB_PASS}@mongodb:27017/cheolog?authSource=admin&authMechanism=SCRAM-SHA-1`
+    );
     logger.log(error.toString(), "error");
   });
 
